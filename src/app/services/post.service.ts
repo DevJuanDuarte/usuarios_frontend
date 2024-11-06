@@ -15,4 +15,8 @@ export class PostService {
   getPosts(): Observable<Post> {  // Utiliza la interfaz Post como tipo de retorno
     return this.http.get<Post>(this.apiUrl);
   }
+
+  createPost(postData: { title: string; content: string; userid: number }): Observable<any> {
+    return this.http.post<any>(this.apiUrl, postData);
+  }
 }

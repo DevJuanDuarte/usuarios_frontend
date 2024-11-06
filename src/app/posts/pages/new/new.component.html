@@ -1,1 +1,21 @@
-<p>new works!</p>
+<form [formGroup]="postForm" (ngSubmit)="onSubmit()" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+  <div class="mb-4">
+    <label for="title" class="block text-gray-700 font-bold mb-2">Título</label>
+    <input id="title" formControlName="title" placeholder="Título del post" class="w-full p-2 border border-gray-300 rounded-md">
+    <div *ngIf="postForm.get('title')?.invalid && postForm.get('title')?.touched" class="text-red-500 text-sm mt-1">
+      <small>El título es requerido</small>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <label for="content" class="block text-gray-700 font-bold mb-2">Contenido</label>
+    <textarea id="content" formControlName="content" placeholder="Contenido del post" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+    <div *ngIf="postForm.get('content')?.invalid && postForm.get('content')?.touched" class="text-red-500 text-sm mt-1">
+      <small>El contenido es requerido</small>
+    </div>
+  </div>
+
+  <button type="submit" [disabled]="postForm.invalid" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-300 disabled:opacity-50">
+    Crear Post
+  </button>
+</form>
