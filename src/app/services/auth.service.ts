@@ -1,8 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { tap, catchError, map } from 'rxjs/operators';
 import { Usuario } from '../interfaces/users.interface';
+
+interface LoginResponse {
+  status: number;
+  message: string;
+  data?: {
+    user: Usuario;
+  };
+}
 
 @Injectable({
   providedIn: 'root'
@@ -11,9 +19,14 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<Usuario | null>(null);
   currentUser$: Observable<Usuario | null> = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    // Verificar el usuario almacenado al iniciar el servicio
+    const storedUser = this.getCurrentUser();
+    if (storedUser && 'id' in storedUser) {
+      this.currentUserSubject.next(storedUser);
+    }
+  }
 
-  // Método para registrar un usuario
   register(user: { name: string; email: string; password: string }): Observable<Usuario> {
     return this.http.post<Usuario>('http://localhost/usuarios_pt/public/api/register', user).pipe(
       tap((response) => {
@@ -23,9 +36,19 @@ export class AuthService {
   }
 
   login(email: string, password: string): Observable<Usuario> {
-    return this.http.post<Usuario>('http://localhost/usuarios_pt/public/api/login', { email, password }).pipe(
-      tap((usuario) => {
-        this.setCurrentUser(usuario); // Aquí guardamos todo el objeto Usuario
+    return this.http.post<LoginResponse>('http://localhost/usuarios_pt/public/api/login', { email, password }).pipe(
+      map(response => {
+        if (response.status === 200 && response.data?.user) {
+          const user = response.data.user;
+          console.log('Usuario procesado:', user); // Para debugging
+          this.setCurrentUser(user);
+          return user;
+        }
+        throw new Error(response.message || 'Error de autenticación');
+      }),
+      catchError(error => {
+        this.logout();
+        return throwError(() => error);
       })
     );
   }
@@ -36,7 +59,8 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!this.getLoggedInUser();
+    const user = this.getLoggedInUser();
+    return !!user && 'id' in user; // Verifica que sea un usuario válido
   }
 
   getLoggedInUser(): Usuario | null {
@@ -44,12 +68,21 @@ export class AuthService {
   }
 
   private setCurrentUser(usuario: Usuario | null): void {
-    this.currentUserSubject.next(usuario);
-    localStorage.setItem('currentUser', JSON.stringify(usuario));
+    if (usuario && 'id' in usuario) {
+      this.currentUserSubject.next(usuario);
+      localStorage.setItem('currentUser', JSON.stringify(usuario));
+    } else {
+      this.currentUserSubject.next(null);
+      localStorage.removeItem('currentUser');
+    }
   }
 
   private getCurrentUser(): Usuario | null {
     const usuario = localStorage.getItem('currentUser');
-    return usuario ? JSON.parse(usuario) : null;
+    if (!usuario) return null;
+    
+    const parsedUser = JSON.parse(usuario);
+    // Verificar que sea un usuario válido y no un mensaje de error
+    return 'id' in parsedUser ? parsedUser : null;
   }
 }
