@@ -1,3 +1,4 @@
+// TypeScript: RegisterComponent.ts
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -46,7 +47,8 @@ export class RegisterComponent {
           alert('Usuario creado exitosamente!');
         },
         (error) => {
-          this.errorMessage = 'Error al registrar el usuario.';
+          // Captura el mensaje de error específico desde la respuesta del servidor
+          this.errorMessage = error.error.message || 'Error al registrar el usuario.';
           console.error('Error al registrar:', error);
         }
       );
