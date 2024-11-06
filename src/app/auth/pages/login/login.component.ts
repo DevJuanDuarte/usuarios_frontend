@@ -36,6 +36,7 @@ export class LoginComponent {
         (error) => {
           this.errorMessage = 'Credenciales incorrectas.';
           console.error('Error al iniciar sesión:', error);
+          alert('Error al iniciar sesion');
         }
       );
     }
