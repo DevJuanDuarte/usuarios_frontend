@@ -3,21 +3,21 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { User } from '../interfaces/users.interface';
+import { Usuario } from '../interfaces/users.interface'; // Ajusta la importación al tipo adecuado
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
+  private currentUserSubject = new BehaviorSubject<Usuario | null>(null);
+  currentUser$: Observable<Usuario | null> = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
-  login(email: string, password: string): Observable<User> {
-    return this.http.post<User>('http://localhost/usuarios_pt/public/api/login', { email, password }).pipe(
-      tap((user) => {
-        this.setCurrentUser(user);
+  login(email: string, password: string): Observable<Usuario> {
+    return this.http.post<Usuario>('http://localhost/usuarios_pt/public/api/login', { email, password }).pipe(
+      tap((usuario) => {
+        this.setCurrentUser(usuario); // Aquí guardamos todo el objeto Usuario
       })
     );
   }
@@ -28,16 +28,20 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!this.getCurrentUser();
+    return !!this.getLoggedInUser();
   }
 
-  private setCurrentUser(user: User | null): void {
-    this.currentUserSubject.next(user);
-    localStorage.setItem('currentUser', JSON.stringify(user));
+  getLoggedInUser(): Usuario | null {
+    return this.getCurrentUser();
   }
 
-  private getCurrentUser(): User | null {
-    const user = localStorage.getItem('currentUser');
-    return user ? JSON.parse(user) : null;
+  private setCurrentUser(usuario: Usuario | null): void {
+    this.currentUserSubject.next(usuario);
+    localStorage.setItem('currentUser', JSON.stringify(usuario));
+  }
+
+  private getCurrentUser(): Usuario | null {
+    const usuario = localStorage.getItem('currentUser');
+    return usuario ? JSON.parse(usuario) : null;
   }
 }
