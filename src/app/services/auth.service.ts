@@ -1,9 +1,8 @@
-// auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { Usuario } from '../interfaces/users.interface'; // Ajusta la importación al tipo adecuado
+import { Usuario } from '../interfaces/users.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +12,15 @@ export class AuthService {
   currentUser$: Observable<Usuario | null> = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) {}
+
+  // Método para registrar un usuario
+  register(user: { name: string; email: string; password: string }): Observable<Usuario> {
+    return this.http.post<Usuario>('http://localhost/usuarios_pt/public/api/register', user).pipe(
+      tap((response) => {
+        console.log('Usuario registrado exitosamente:', response);
+      })
+    );
+  }
 
   login(email: string, password: string): Observable<Usuario> {
     return this.http.post<Usuario>('http://localhost/usuarios_pt/public/api/login', { email, password }).pipe(
