@@ -31,6 +31,10 @@ export class AuthService {
     return this.http.post<Usuario>('http://localhost/usuarios_pt/public/api/register', user).pipe(
       tap((response) => {
         console.log('Usuario registrado exitosamente:', response);
+      }),
+      catchError((error) => {
+        console.error('Error en el registro:', error);
+        return throwError(error); // Lanza el error para que pueda ser manejado en el componente
       })
     );
   }
@@ -67,6 +71,15 @@ export class AuthService {
     return this.getCurrentUser();
   }
 
+  private getCurrentUser(): Usuario | null {
+    const usuario = localStorage.getItem('currentUser');
+    if (!usuario) return null;
+    
+    const parsedUser = JSON.parse(usuario);
+    // Verificar que sea un usuario válido y no un mensaje de error
+    return 'id' in parsedUser ? parsedUser : null;
+  }
+
   private setCurrentUser(usuario: Usuario | null): void {
     if (usuario && 'id' in usuario) {
       this.currentUserSubject.next(usuario);
@@ -77,12 +90,5 @@ export class AuthService {
     }
   }
 
-  private getCurrentUser(): Usuario | null {
-    const usuario = localStorage.getItem('currentUser');
-    if (!usuario) return null;
-    
-    const parsedUser = JSON.parse(usuario);
-    // Verificar que sea un usuario válido y no un mensaje de error
-    return 'id' in parsedUser ? parsedUser : null;
-  }
+  
 }

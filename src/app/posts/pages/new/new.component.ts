@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { PostService } from '../../../services/post.service';
 import { AuthService } from '../../../services/auth.service';
-import { Post } from '../../../interfaces/post.interface';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -10,6 +9,7 @@ import { Router } from '@angular/router';
   templateUrl: './new.component.html',
 })
 export class NewComponent {
+
   postForm: FormGroup;
 
   constructor(

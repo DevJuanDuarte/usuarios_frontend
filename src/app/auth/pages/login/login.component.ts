@@ -36,6 +36,9 @@ export class LoginComponent {
           this.loginForm.get('password')?.reset();
         }
       });
+    } else {
+      this.errorMessage = 'Campos vacíos, complete los campos.';
     }
   }
+
 }
